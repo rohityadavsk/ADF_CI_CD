@@ -1,0 +1,52 @@
+{
+	"name": "pl_dbricks_nb",
+	"properties": {
+		"activities": [
+			{
+				"name": "databricks notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/22bca10860@cuchd.in/Practice/adf connection",
+					"baseParameters": {
+						"first_name": {
+							"value": "@pipeline().parameters.first_name",
+							"type": "Expression"
+						},
+						"Roll_Out_No": {
+							"value": "@pipeline().parameters.roll_out",
+							"type": "Expression"
+						},
+						"pipeline_name": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"first_name": {
+				"type": "string"
+			},
+			"roll_out": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-14T02:40:09Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

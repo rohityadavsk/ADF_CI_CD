@@ -1,0 +1,112 @@
+{
+	"name": "df_error_rows",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_adf_scenario_container",
+						"type": "DatasetReference"
+					},
+					"name": "errorrowsinput"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_adf_scenario_container",
+						"type": "DatasetReference"
+					},
+					"name": "errordatesink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adf_scenario_container",
+						"type": "DatasetReference"
+					},
+					"name": "errordepartmentsink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_adf_scenario_container",
+						"type": "DatasetReference"
+					},
+					"name": "goodrecordssink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "spliterrorandgoodrecords"
+				},
+				{
+					"name": "errorfilenamedatecolumn"
+				},
+				{
+					"name": "errorcolumndepartmentcolumn"
+				},
+				{
+					"name": "goodrecordscolumn"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Birth as string,",
+				"          Name as string,",
+				"          Department as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> errorrowsinput",
+				"errorrowsinput split(isNull(toDate(Birth, 'dd-MMM-yyyy')),",
+				"     not(regexMatch(Department, '^[A-Za-z]+$')),",
+				"     disjoint: false) ~> spliterrorandgoodrecords@(errordaterecords, errordepartmentrecords, goodrecords)",
+				"spliterrorandgoodrecords@errordaterecords derive(file_name = 'error_date_records') ~> errorfilenamedatecolumn",
+				"spliterrorandgoodrecords@errordepartmentrecords derive(file_name = 'error_department_records') ~> errorcolumndepartmentcolumn",
+				"spliterrorandgoodrecords@goodrecords derive(file_name = 'good records') ~> goodrecordscolumn",
+				"errorfilenamedatecolumn sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Birth as string,",
+				"          Name as string,",
+				"          Department as string",
+				"     ),",
+				"     partitionFileNames:['error_date.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> errordatesink",
+				"errorcolumndepartmentcolumn sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Birth as string,",
+				"          Name as string,",
+				"          Department as string",
+				"     ),",
+				"     partitionFileNames:['error_dept.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> errordepartmentsink",
+				"goodrecordscolumn sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Birth as string,",
+				"          Name as string,",
+				"          Department as string",
+				"     ),",
+				"     partitionFileNames:['good_records.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> goodrecordssink"
+			]
+		}
+	}
+}

@@ -1,0 +1,74 @@
+{
+	"name": "ds_ipl_data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "points_table.csv",
+				"folderPath": "ipl",
+				"fileSystem": "kaggle"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "season",
+				"type": "String"
+			},
+			{
+				"name": "rank",
+				"type": "String"
+			},
+			{
+				"name": "name",
+				"type": "String"
+			},
+			{
+				"name": "short_name",
+				"type": "String"
+			},
+			{
+				"name": "matchesplayed",
+				"type": "String"
+			},
+			{
+				"name": "matcheswon",
+				"type": "String"
+			},
+			{
+				"name": "matcheslost",
+				"type": "String"
+			},
+			{
+				"name": "noresult",
+				"type": "String"
+			},
+			{
+				"name": "matchpoints",
+				"type": "String"
+			},
+			{
+				"name": "nrr",
+				"type": "String"
+			},
+			{
+				"name": "for",
+				"type": "String"
+			},
+			{
+				"name": "against",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

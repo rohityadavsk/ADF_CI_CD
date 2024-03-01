@@ -1,0 +1,143 @@
+{
+	"name": "pl_150_columns",
+	"properties": {
+		"activities": [
+			{
+				"name": "df_150_columns_temp1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "truncate_tables_script",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_150_columns",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"sink1": {
+								"schema_name": "commercial_stg",
+								"table_name": "points_temp1"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "df_150_columns_temp2",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "df_150_columns_temp1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_150_columns",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"sink1": {
+								"schema_name": "commercial_stg",
+								"table_name": "points_temp2"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "truncate_tables_script",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "truncate table commercial_stg.points_temp1;\ntruncate table commercial_stg.points_temp2;"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "put temp_data_into_points",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "df_150_columns_temp2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "with cte as(\nselect a.*\n\t  ,b.noresult\n\t  ,b.matchpoints\n\t  ,b.nrr\n\t  ,b.[for]\n\t  ,b.against\nfrom commercial_stg.points_temp1 a\ninner join commercial_stg.points_temp2 b\non a.id=b.id)\n\ninsert into commercial_stg.points\nselect * from cte"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-11-21T02:58:26Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
